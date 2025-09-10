@@ -13,3 +13,7 @@ def get_productos():
         {"id": 2, "nombre": "Cheesecake", "precio": 300},
         {"id": 3, "nombre": "Pay de limón", "precio": 200},
     ]
+
+def read_root():
+    return {"mensaje": "Hola desde Breanch Alan 🎂"}
+    
