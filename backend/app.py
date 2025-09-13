@@ -1,10 +1,18 @@
-from flask import Flask, jsonify
+from fastapi import FastAPI
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route('/')
-def hello():
-    return jsonify(message="Hola mundo desde backend")
+productos = [
+    {"id": 1, "nombre": "Pastel de chocolate", "precio": 250},
+    {"id": 2, "nombre": "Cheesecake", "precio": 300},
+    {"id": 3, "nombre": "Pay de limón", "precio": 200},
+    {"id": 4, "nombre": "Pastel tres leches", "precio": 280},
+]
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+@app.get("/")
+def read_root():
+    return {"mensaje": "Hola desde el backend de Pastelería 🎂"}
+
+@app.get("/productos")
+def get_productos():
+    return productos
