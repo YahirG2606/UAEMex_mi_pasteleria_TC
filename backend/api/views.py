@@ -103,16 +103,40 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def _notify_order_created(self, order):
+        # Datos básicos
         total_items = order.items.count()
-        total_formatted = format(order.total, ".2f")
+        total_formatted = format(order.total, ".2f") if hasattr(order, "total") else "0.00"
         customer_name = self._get_customer_display(order.customer)
-        message = (
-            f"Pedido #{order.id} creado por {customer_name}. "
-            f"Productos: {total_items}. Total estimado: ${total_formatted}."
+        customer_email = getattr(order.customer, "email", "Sin email")
+        delivery_date = getattr(order, "delivery_date", None)
+        if delivery_date:
+            try:
+                delivery_str = delivery_date.strftime("%Y-%m-%d")
+            except Exception:
+                delivery_str = str(delivery_date)
+        else:
+            delivery_str = "Sin fecha"
+        notes = getattr(order, "notes", "Sin notas")
+
+        # Lista de productos
+        items_text = "\n".join(
+            f"- {getattr(item.product, 'name', str(item.product))} x{getattr(item, 'quantity', 1)}"
+            for item in order.items.all()
         )
+
+        # Mensaje completo
+        message = (
+            f"Pedido #{order.id} creado\n"
+            f"Cliente: {customer_name} ({customer_email})\n"
+            f"Entrega: {delivery_str}\n"
+            f"Productos ({total_items}):\n{items_text}\n"
+            f"Notas: {notes}\n"
+            f"Total estimado: ${total_formatted}"
+        )
+
         send_ntfy_message(
             message,
-            title="Nuevo pedido",
+            title=f"Nuevo pedido #{order.id}",
             tags=["bell"],
         )
 
